@@ -86,114 +86,139 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(createAxisArrow(new THREE.Vector3(0, 1, 0), 0x00ff00, "Y"));
   scene.add(createAxisArrow(new THREE.Vector3(0, 0, 1), 0x0000ff, "Z"));
 
-  // =========================
+// =========================
 // ✈️ AIRCRAFT MESH (PROCÉDURAL)
 // =========================
 function createAircraftMesh() {
-
   const geometry = new THREE.BufferGeometry();
 
-  // vertices (X = latéral, Y = vertical dans ton plan, Z = profondeur)
+  // vertices (X = latéral, Y = vertical, Z = profondeur / axe fuselage)
   const vertices = new Float32Array([
-    // =================
-    // NEZ (avant)
-    // =================
-     0.00,  1.90, 0,   // 0 pointe nez
-    -0.20,  1.70, 0,   // 1
-     0.20,  1.70, 0,   // 2
+    // ── FUSELAGE ── (sections octogonales simplifiées : droite, haut, gauche, bas)
+    // 0  – pointe du nez
+    0, 0, -2.9,
+    // 1-4 – section nez
+    0.18, 0, -2.4,    0, 0.18, -2.4,    -0.18, 0, -2.4,   0, -0.12, -2.4,
+    // 5-8 – avant cabine
+    0.28, 0, -1.4,    0, 0.28, -1.4,    -0.28, 0, -1.4,   0, -0.18, -1.4,
+    // 9-12 – milieu cabine
+    0.30, 0, 0.2,     0, 0.30, 0.2,     -0.30, 0, 0.2,    0, -0.20, 0.2,
+    // 13-16 – début queue
+    0.22, 0, 1.8,     0, 0.22, 1.8,     -0.22, 0, 1.8,    0, -0.14, 1.8,
+    // 17-20 – fin queue
+    0.10, 0, 2.8,     0, 0.10, 2.8,     -0.10, 0, 2.8,    0, -0.06, 2.8,
+    // 21 – pointe queue
+    0, 0.0, 2.85,
 
-    // =================
-    // FUSELAGE AVANT
-    // =================
-    -0.25,  1.40, 0,   // 3
-     0.25,  1.40, 0,   // 4
-    -0.30,  1.10, 0,   // 5
-     0.30,  1.10, 0,   // 6
+    // ── AILE DROITE ──
+    0.30, -0.06, -0.6,   // 22 racine avant
+    0.30, -0.06,  0.6,   // 23 racine arrière
+    2.2,  -0.10,  0.3,   // 24 saumon avant
+    2.2,  -0.10,  0.9,   // 25 saumon arrière
+    0.30, -0.06, -0.9,   // 26 fuselage bord attaque
 
-    // =================
-    // CENTRE + AILES
-    // =================
-    -0.35,  0.80, 0,   // 7
-     0.35,  0.80, 0,   // 8
+    // ── AILE GAUCHE ──
+    -0.30, -0.06, -0.6,  // 27
+    -0.30, -0.06,  0.6,  // 28
+    -2.2,  -0.10,  0.3,  // 29
+    -2.2,  -0.10,  0.9,  // 30
+    -0.30, -0.06, -0.9,  // 31
 
-    -0.60,  0.40, 0,   // 9  aile gauche intérieure
-     0.60,  0.40, 0,   // 10 aile droite intérieure
+    // ── STABILISATEUR HORIZONTAL DROIT ──
+    0.22, -0.03, 1.8,    // 36
+    0.22, -0.03, 2.4,    // 37
+    0.70, -0.05, 2.0,    // 38
+    0.70, -0.05, 2.6,    // 39
 
-    -1.40,  0.10, 0,   // 11 bout aile gauche
-     1.40,  0.10, 0,   // 12 bout aile droite
+    // ── STABILISATEUR HORIZONTAL GAUCHE ──
+    -0.22, -0.03, 1.8,   // 40
+    -0.22, -0.03, 2.4,   // 41
+    -0.70, -0.05, 2.0,   // 42
+    -0.70, -0.05, 2.6,   // 43
 
-    // =================
-    // ARRIÈRE FUSELAGE
-    // =================
-    -0.40, -0.30, 0,   // 13
-     0.40, -0.30, 0,   // 14
+    // ── WINGLETS DROIT ──
+    2.2,  -0.10, 0.3,    // 44
+    2.2,  -0.10, 0.9,    // 45
+    2.35,  0.18, 0.5,    // 46
+    2.35,  0.18, 0.85,   // 47
 
-    -0.25, -0.80, 0,   // 15
-     0.25, -0.80, 0,   // 16
-
-    // =================
-    // EMPENNAGE (QUEUE)
-    // =================
-    -0.10, -1.40, 0,   // 17
-     0.10, -1.40, 0,   // 18
-
-     0.00, -1.80, 0    // 19 pointe arrière
+    // ── WINGLETS GAUCHE ──
+    -2.2,  -0.10, 0.3,   // 48
+    -2.2,  -0.10, 0.9,   // 49
+    -2.35,  0.18, 0.5,   // 50
+    -2.35,  0.18, 0.85,  // 51
   ]);
 
   // =================
   // TRIANGLES
   // =================
   const indices = [
+    // FUSELAGE DESSUS
+    0,2,1,  0,3,2,
+    1,2,6,  1,6,5,
+    2,3,7,  2,7,6,
+    5,6,10, 5,10,9,
+    6,7,11, 6,11,10,
+    9,10,14,9,14,13,
+    10,11,15,10,15,14,
+    13,14,18,13,18,17,
+    14,15,19,14,19,18,
+    17,18,21,18,19,21,
 
-    // NEZ
-    0, 1, 2,
+    // FUSELAGE DESSOUS
+    0,1,4,  0,4,3,
+    1,5,8,  1,8,4,
+    3,4,8,  3,8,7,
+    5,9,12, 5,12,8,
+    7,8,12, 7,12,11,
+    9,13,16,9,16,12,
+    11,12,16,11,16,15,
+    13,17,20,13,20,16,
+    15,16,20,15,20,19,
+    17,21,20,19,20,21,
 
-    // FUSELAGE AVANT
-    1, 3, 2,
-    2, 3, 4,
-    3, 5, 4,
-    4, 5, 6,
+    // AILE DROITE
+    26,22,24,  22,23,24,  23,25,24,
+    24,22,26,  24,23,22,  25,23,24,
 
-    // CENTRE
-    5, 7, 6,
-    6, 7, 8,
+    // AILE GAUCHE
+    27,31,29,  28,27,29,  28,29,30,
+    29,27,31,  29,28,27,  30,29,28,
 
-    // AILES
-    7, 9, 8,
-    8, 9, 10,
-    9, 11, 10,
-    10, 11, 12,
+    // DÉRIVE
+    32,35,34,  32,34,33,
+    33,34,35,  33,35,32,
 
-    // TRANSITION ARRIÈRE
-    7, 13, 9,
-    8, 10, 14,
-    9, 13, 11,
-    10, 12, 14,
+    // STABILISATEUR DROIT
+    36,37,38,  37,39,38,
+    38,37,36,  38,39,37,
 
-    // CORPS ARRIÈRE
-    13, 15, 14,
-    14, 15, 16,
+    // STABILISATEUR GAUCHE
+    40,42,41,  41,42,43,
+    41,40,42,  43,42,41,
 
-    // EMPENNAGE
-    15, 17, 16,
-    16, 17, 18,
-    17, 18, 19
+    // WINGLETS DROIT
+    44,46,45,  45,46,47,
+    45,44,46,  47,46,45,
+
+    // WINGLETS GAUCHE
+    48,49,50,  49,51,50,
+    50,49,48,  50,51,49,
   ];
 
-  geometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(vertices, 3)
-  );
-
+  geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
   geometry.setIndex(indices);
   geometry.computeVertexNormals();
 
-  return new THREE.Mesh(
+  const mesh = new THREE.Mesh(
     geometry,
-    new THREE.MeshNormalMaterial({
-      flatShading: true
-    })
+    new THREE.MeshNormalMaterial({ flatShading: true, side: THREE.DoubleSide })
   );
+
+  // 🔻 réduction d'échelle globale
+  mesh.scale.set(0.5, 0.5, 0.5);
+
+  return mesh;
 }
 
   const plane = createAircraftMesh();
