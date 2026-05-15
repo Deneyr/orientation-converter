@@ -39,3 +39,22 @@ h1 {
 #viewer {
   flex: 1;
 }
+
+.unit-selector {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+}

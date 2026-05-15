@@ -326,6 +326,8 @@ const indices = [
 
   const plane = createAircraftMesh();
   scene.add(plane);
+  const rotationVizGroup = new THREE.Group();
+  scene.add(rotationVizGroup);
   plane.quaternion.identity();
 
   // =========================
@@ -364,11 +366,373 @@ const indices = [
 
     plane.quaternion.copy(q);
 
+    updateRotationVisualization(e);
+
     set("qx", q.x);
     set("qy", q.y);
     set("qz", q.z);
     set("qw", q.w);
   }
+
+function createRotationArc(axis, angle, radius, color) {
+
+  const segments = 64;
+  const points = [];
+
+  for (let i = 0; i <= segments; i++) {
+
+    const t = angle * (i / segments);
+
+    let p;
+
+    // arc dans XY
+    p = new THREE.Vector3(
+      radius * Math.cos(t),
+      radius * Math.sin(t),
+      0
+    );
+
+    points.push(p);
+  }
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+  const material = new THREE.LineBasicMaterial({
+    color,
+    linewidth: 3
+  });
+
+  const line = new THREE.Line(geometry, material);
+
+  // orientation selon axe
+  if (axis === 'X') {
+    line.rotation.y = Math.PI / 2;
+  }
+  else if (axis === 'Y') {
+    line.rotation.x = Math.PI / 2;
+  }
+
+  return line;
+}
+
+function createArcGeometry(radius, angle, segments = 64) {
+
+  const points = [];
+
+  for (let i = 0; i <= segments; i++) {
+
+    const t = angle * (i / segments);
+
+    points.push(
+      new THREE.Vector3(
+        radius * Math.cos(t),
+        radius * Math.sin(t),
+        0
+      )
+    );
+  }
+
+  return new THREE.BufferGeometry().setFromPoints(points);
+}
+
+function updateRotationVisualization(euler) {
+
+  rotationVizGroup.clear();
+
+  const order = euler.order;
+
+  const angles = {
+    X: euler.x,
+    Y: euler.y,
+    Z: euler.z
+  };
+
+  const axisVectors = {
+    X: new THREE.Vector3(1,0,0),
+    Y: new THREE.Vector3(0,1,0),
+    Z: new THREE.Vector3(0,0,1)
+  };
+
+  const colors = {
+    X: 0xff4444,
+    Y: 0x44ff44,
+    Z: 0x4488ff
+  };
+
+  // =========================
+  // ORIENTATION CUMULÉE
+  // =========================
+
+  let cumulativeQuat = new THREE.Quaternion();
+
+  // =========================
+  // DIRECTION INITIALE
+  // =========================
+
+  let currentDirection =
+    axisVectors[order[2]]
+      .clone()
+      .normalize();
+
+  const radius = 1;
+
+  for (let i = 0; i < order.length; i++) {
+
+    const axisName = order[i];
+    const angle = angles[axisName];
+
+    // =========================
+    // AXE INTRINSÈQUE COURANT
+    // =========================
+
+    const axis =
+      axisVectors[axisName]
+        .clone()
+        .applyQuaternion(cumulativeQuat)
+        .normalize();
+
+    // =========================
+    // BASE DU PLAN
+    // =========================
+
+    let u = currentDirection.clone();
+
+    // correction dernier arc
+    if (i === order.length - 1) {
+
+      u =
+        axisVectors[order[i - 1]]
+          .clone()
+          .applyQuaternion(cumulativeQuat);
+    }
+
+    u.normalize();
+
+    const v =
+      new THREE.Vector3()
+        .crossVectors(axis, u)
+        .normalize();
+
+    // =========================
+    // PARAMÈTRES ARC
+    // =========================
+
+    let offset = new THREE.Vector3();
+    let realRadius = radius;
+
+    if (i === order.length - 1) {
+
+      offset =
+        currentDirection
+          .clone()
+          .setLength(radius);
+
+      realRadius = radius * 0.75;
+    }
+
+    // =========================
+    // POINTS ARC
+    // =========================
+
+    const points = [];
+
+    const segments = 64;
+
+    for (let s = 0; s <= segments; s++) {
+
+      const t = angle * (s / segments);
+
+      const p =
+        u.clone()
+          .multiplyScalar(Math.cos(t) * realRadius)
+          .add(
+            v.clone()
+              .multiplyScalar(Math.sin(t) * realRadius)
+          )
+          .add(offset);
+
+      points.push(p);
+    }
+
+    // =========================
+    // ARC PRINCIPAL
+    // =========================
+
+    const geometry =
+      new THREE.BufferGeometry()
+        .setFromPoints(points);
+
+    const material =
+      new THREE.LineBasicMaterial({
+        color: colors[axisName]
+      });
+
+    const arc =
+      new THREE.Line(geometry, material);
+
+    rotationVizGroup.add(arc);
+
+    // =====================================================
+    // TRAIT DE DÉBUT
+    // =====================================================
+
+    const startPoint = points[0];
+
+    const startDir =
+      startPoint.clone()
+        .sub(offset)
+        .normalize();
+
+    // =====================================================
+    // PETIT DÉCALAGE POUR ÉVITER LE Z-FIGHTING
+    // AVEC LE 3ᵉ AXE
+    // =====================================================
+
+    let tickOffset = new THREE.Vector3();
+
+    if (i === 0) {
+
+      tickOffset =
+        axis.clone()
+          .multiplyScalar(0.00015);
+    }
+
+    const startTickPoints = [
+
+      startPoint.clone()
+        .add(tickOffset)
+        .add(
+          startDir.clone()
+            .multiplyScalar(-0.08)
+        ),
+
+      startPoint.clone()
+        .add(tickOffset)
+        .add(
+          startDir.clone()
+            .multiplyScalar(0.08)
+        )
+    ];
+
+    const startTickGeometry =
+      new THREE.BufferGeometry()
+        .setFromPoints(startTickPoints);
+
+    const startTick =
+      new THREE.Line(
+        startTickGeometry,
+        new THREE.LineBasicMaterial({
+          color: colors[axisName]
+        })
+      );
+
+    rotationVizGroup.add(startTick);
+
+    // =====================================================
+// FLÈCHE DE FIN
+// =====================================================
+
+const endPoint = points[points.length - 1];
+
+// tangente dans le sens du mouvement
+const tangent =
+  v.clone()
+    .multiplyScalar(Math.cos(angle))
+    .sub(
+      u.clone()
+        .multiplyScalar(Math.sin(angle))
+    )
+    .normalize();
+
+  // =====================================================
+  // ORIENTATION DES FLÈCHES
+  // =====================================================
+
+  // pour les 2 premiers arcs
+  let arrowLength = -0.16;
+  let arrowWidth  = -0.05;
+
+  // dernier arc
+  if (i === order.length - 1) {
+
+    arrowLength = 0.16;
+    arrowWidth  = 0.05;
+  }
+
+  const arrowHead1 =
+    endPoint.clone()
+      .add(
+        tangent.clone()
+          .multiplyScalar(-arrowLength)
+      )
+      .add(
+        axis.clone()
+          .multiplyScalar(arrowWidth)
+      );
+
+  const arrowHead2 =
+    endPoint.clone()
+      .add(
+        tangent.clone()
+          .multiplyScalar(-arrowLength)
+      )
+      .add(
+        axis.clone()
+          .multiplyScalar(-arrowWidth)
+      );
+
+  const arrowGeometry1 =
+    new THREE.BufferGeometry()
+      .setFromPoints([
+        endPoint,
+        arrowHead1
+      ]);
+
+  const arrowGeometry2 =
+    new THREE.BufferGeometry()
+      .setFromPoints([
+        endPoint,
+        arrowHead2
+      ]);
+
+  const arrow1 =
+    new THREE.Line(
+      arrowGeometry1,
+      new THREE.LineBasicMaterial({
+        color: colors[axisName]
+      })
+    );
+
+  const arrow2 =
+    new THREE.Line(
+      arrowGeometry2,
+      new THREE.LineBasicMaterial({
+        color: colors[axisName]
+      })
+    );
+
+    rotationVizGroup.add(arrow1);
+    rotationVizGroup.add(arrow2);
+
+    // =========================
+    // NOUVELLE DIRECTION
+    // =========================
+
+    currentDirection =
+      u.clone()
+        .applyAxisAngle(axis, angle);
+
+    // =========================
+    // MAJ QUATERNION
+    // =========================
+
+    const q = new THREE.Quaternion();
+
+    q.setFromAxisAngle(axis, angle);
+
+    cumulativeQuat.premultiply(q);
+  }
+}
 
   function fromQuat() {
 
@@ -386,6 +750,8 @@ const indices = [
     set("yaw", fromRad(e.z));
 
     plane.quaternion.copy(q);
+
+    updateRotationVisualization(e);
   }
 
   // =========================
