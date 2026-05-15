@@ -3,69 +3,178 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orientation Converter</title>
 
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+  <form id="monForm">
+    <h1>Euler ↔ Quaternion Converter</h1>
+    <div class="layout">
 
-<h1>Euler ↔ Quaternion Converter</h1>
+      <div class="leftColumn">
 
-<div class="container">
+        <!-- ========================= -->
+        <!-- PANEL -->
+        <!-- ========================= -->
 
-  <!-- PANEL -->
-  <div class="panel">
+        <div class="panel">
 
-    <h2>Ordre des rotations</h2>
+          <!-- INPUT -->
 
-    <select id="rotationOrder">
-      <option value="XYZ">XYZ (x → y' → z'')</option>
-      <option value="YXZ">YXZ (y → x' → z'')</option>
-      <option value="ZXY">ZXY (z → x' → y'')</option>
-      <option value="ZYX">ZYX (z → y' → x'')</option>
-      <option value="XZY">XZY (x → z' → y'')</option>
-      <option value="YZX">YZX (y → z' → x'')</option>
-    </select>
+          <div class="card">
 
-    <h2>Unités</h2>
+            <h2>Input</h2>
 
-    <div class="unit-selector">
+            <label>Type</label>
 
-      <label class="radio-option">
-        <input type="radio" name="angleUnit" value="deg" checked>
-        <span>Degrés</span>
-      </label>
+            <select id="inputType">
+              <option value="euler">Euler</option>
+              <option value="quaternion">Quaternion</option>
+            </select>
 
-      <label class="radio-option">
-        <input type="radio" name="angleUnit" value="rad">
-        <span>Radians</span>
-      </label>
+            <!-- EULER INPUT -->
+
+            <div id="eulerInputFields">
+
+              <label>Intrinsic order</label>
+
+              <select id="order">
+                <option selected>ZYX</option>
+                <option>ZXY</option>
+                <option>YZX</option>
+                <option>YXZ</option>
+                <option>XZY</option>
+                <option>XYZ</option>
+              </select>
+
+              <div class="orderHint" id="orderHint">
+                ZYX (z y' x'')
+              </div>
+
+              <div>
+                <label>X</label>
+                <input class="only-number" id="ex" type="number" value="0" step="0.1" />
+              </div>
+              <div>
+                <label>Y</label>
+                <input class="only-number" id="ey" type="number" value="0" step="0.1" />
+              </div>
+              <div>
+                <label>Z</label>
+                <input class="only-number" id="ez" type="number" value="0" step="0.1" />
+              </div>
+
+              <div class="unit-selector">
+
+                <label class="radio-option">
+                  <input type="radio" name="angleUnit" value="deg" checked />
+                  <span>Degrees</span>
+                </label>
+
+                <label class="radio-option">
+                  <input type="radio" name="angleUnit" value="rad" />
+                  <span>Radians</span>
+                </label>
+
+              </div>
+
+            </div>
+
+            <!-- QUAT INPUT -->
+
+            <div id="quatInputFields" style="display:none">
+
+              <div>
+                <label>qx</label>
+                <input id="qx" type="number" value="0" step="0.001" />
+              </div>
+              <div>
+                <label>qy</label>
+                <input id="qy" type="number" value="0" step="0.001" />
+              </div>
+              <div>
+                <label>qz</label>
+                <input id="qz" type="number" value="0" step="0.001" />
+              </div>
+              <div>
+                <label>qw</label>
+                <input id="qw" type="number" value="1" step="0.001" />
+              </div>
+            </div>
+          </div>
+
+          <button id="convertBtn">
+            Convert
+          </button>
+
+          <!-- OUTPUT -->
+
+          <div class="card">
+
+            <h2>Output</h2>
+
+            <label>Type</label>
+
+            <select id="outputType">
+              <option value="euler">Euler</option>
+              <option value="quaternion" selected>Quaternion (Normalized)</option>
+            </select>
+
+            <!-- EULER OUTPUT -->
+
+            <div id="eulerOutputFields" style="display:none">
+              <div>
+                <label>X</label>
+                <input id="outEx" readonly />
+              </div>
+              <div>
+                <label>Y</label>
+                <input id="outEy" readonly />
+              </div>
+              <div>
+                <label>Z</label>
+                <input id="outEz" readonly />
+              </div>
+            </div>
+
+            <!-- QUAT OUTPUT -->
+
+            <div id="quatOutputFields">
+              <div>
+                <label>qx</label>
+                <input id="outQx" readonly />
+              </div>
+              <div>
+                <label>qy</label>
+                <input id="outQy" readonly />
+              </div>
+              <div>
+                <label>qz</label>
+                <input id="outQz" readonly />
+              </div>
+              <div>
+                <label>qw</label>
+                <input id="outQw" readonly />
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- VIEW -->
+
+      </div>
+
+      <div id="viewer"></div>
 
     </div>
 
-    <h2>Euler</h2>
-
-    <input id="roll" placeholder="X" type="number" value="0">
-    <input id="pitch" placeholder="Y" type="number" value="0">
-    <input id="yaw" placeholder="Z" type="number" value="0">
-
-    <h2>Quaternion</h2>
-
-    <input id="qx" placeholder="x" type="number" step="0.001" value="0">
-    <input id="qy" placeholder="y" type="number" step="0.001" value="0">
-    <input id="qz" placeholder="z" type="number" step="0.001" value="0">
-    <input id="qw" placeholder="w" type="number" step="0.001" value="1">
-
-  </div>
-
-  <!-- VIEW -->
-  <div id="viewer"></div>
-
-</div>
-
-<script type="module" src="script.js"></script>
-
+    <script type="module" src="script.js"></script>
+  </form>
 </body>
+
 </html>

@@ -1,60 +1,123 @@
-* {
-  box-sizing: border-box;
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #111827;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-html, body {
-  margin: 0;
-  height: 100%;
-  font-family: Arial;
-  background: #1e1e1e;
-  color: white;
+.layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+.leftColumn {
+  width: 340px;
+  height: 100vh;
+}
+
+.panel {
+  width: 340px;
+  padding: 16px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 h1 {
   margin: 0;
   padding: 15px;
   text-align: center;
-  background: #2a2a2a;
+  background: #1e293b;
 }
 
-.container {
-  display: flex;
-  height: calc(100vh - 60px);
+.card h2 {
+  margin: 0 0 8px 0;
 }
 
-.panel {
-  width: 320px;
-  padding: 15px;
-  background: #2b2b2b;
-  overflow-y: auto;
+label {
+  font-size: 13px;
+  color: #cbd5e1;
 }
 
-.panel input,
-.panel select {
-  width: 100%;
-  margin: 5px 0;
-  padding: 8px;
+input,
+select,
+button {
+  border: none;
+  border-radius: 3px;
 }
 
-#viewer {
-  flex: 1;
+input {
+  position: relative;
+}
+
+input:focus {
+  z-index: 10;
+}
+
+input,
+select {
+  background: #0f172a;
+  color: white;
+  padding: 10px;
+}
+
+input[readonly] {
+  opacity: 0.85;
+}
+
+.orderHint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
 }
 
 .unit-selector {
   display: flex;
-  gap: 18px;
   align-items: center;
-  margin-top: 8px;
+  gap: 18px;
+  margin-top: 10px;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
-  font-size: 14px;
 }
 
-.radio-option input[type="radio"] {
+.radio-option input {
   margin: 0;
+}
+
+#convertBtn {
+  background: #2563eb;
+  color: white;
+
+  padding: 12px;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+#convertBtn:hover {
+  background: #1d4ed8;
+}
+
+#viewer {
+  flex: 1;
 }
