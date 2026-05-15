@@ -709,7 +709,6 @@ function updateRotationVisualization(euler) {
 // =========================
 
 const inputType = document.getElementById("inputType");
-const outputType = document.getElementById("outputType");
 const orderSelect = document.getElementById("order");
 const orderHint = document.getElementById("orderHint");
 
@@ -719,6 +718,9 @@ function updateOrderHint() {
 
     orderHint.textContent =
         `${order} (${order[0].toLowerCase()} ${order[1].toLowerCase()}' ${order[2].toLowerCase()}'' )`;
+
+    // sync order tags displayed in output panel
+
 }
 
 function refreshUI() {
@@ -732,24 +734,63 @@ function refreshUI() {
         inputType.value === "quaternion"
             ? "block"
             : "none";
-
-    document.getElementById("eulerOutputFields").style.display =
-        outputType.value === "euler"
-            ? "block"
-            : "none";
-
-    document.getElementById("quatOutputFields").style.display =
-        outputType.value === "quaternion"
-            ? "block"
-            : "none";
 }
 
 inputType.addEventListener("change", refreshUI);
-outputType.addEventListener("change", refreshUI);
-orderSelect.addEventListener("change", updateOrderHint);
+orderSelect.addEventListener("change", () => { updateOrderHint(); convert(); });
 
 refreshUI();
 updateOrderHint();
+
+// =========================
+// EULER OUTPUT TOGGLE
+// =========================
+
+function updateEulerOutput(euler) {
+    if (!euler) return;
+    const outOrder = document.getElementById("outOrder").value;
+    // Re-derive euler in the requested output order from the cached quaternion
+    const e = _lastQuat
+        ? new THREE.Euler().setFromQuaternion(_lastQuat, outOrder)
+        : new THREE.Euler(euler.x, euler.y, euler.z, outOrder);
+    const unit = document.querySelector('input[name="outAngleUnit"]:checked').value;
+    const isDeg = unit === "deg";
+    const fx = isDeg ? e.x * 180 / Math.PI : e.x;
+    const fy = isDeg ? e.y * 180 / Math.PI : e.y;
+    const fz = isDeg ? e.z * 180 / Math.PI : e.z;
+    const dec = isDeg ? 4 : 6;
+    document.getElementById("outEulerX").value = fx.toFixed(dec);
+    document.getElementById("outEulerY").value = fy.toFixed(dec);
+    document.getElementById("outEulerZ").value = fz.toFixed(dec);
+}
+
+let _lastEuler = null;
+let _lastQuat = null;
+
+function updateAxisAngleOutput() {
+    if (!_lastQuat) return;
+    const q = _lastQuat;
+    // clamp w to [-1,1] to avoid NaN in acos
+    const w = Math.max(-1, Math.min(1, q.w));
+    const angle = 2 * Math.acos(w);
+    const s = Math.sqrt(1 - w * w);
+    let ax, ay, az;
+    if (s < 0.0001) {
+        // angle near 0 or 2π — axis is arbitrary
+        ax = 1; ay = 0; az = 0;
+    } else {
+        ax = q.x / s;
+        ay = q.y / s;
+        az = q.z / s;
+    }
+    const unit = document.querySelector('input[name="outAngleUnitAA"]:checked').value;
+    const theta = unit === "deg" ? angle * 180 / Math.PI : angle;
+    const dec = unit === "deg" ? 4 : 6;
+    document.getElementById("outAx").value = ax.toFixed(6);
+    document.getElementById("outAy").value = ay.toFixed(6);
+    document.getElementById("outAz").value = az.toFixed(6);
+    document.getElementById("outAngle").value = theta.toFixed(dec);
+}
 
 // =========================
 // CONVERT
@@ -802,42 +843,49 @@ function convert() {
 
     plane.quaternion.copy(quaternion);
 
+    _lastEuler = euler;
+    _lastQuat = quaternion.clone();
     updateRotationVisualization(euler);
 
-    if (outputType.value === "quaternion") {
+    // --- Quaternion ---
+    document.getElementById("outQx").value = quaternion.x.toFixed(6);
+    document.getElementById("outQy").value = quaternion.y.toFixed(6);
+    document.getElementById("outQz").value = quaternion.z.toFixed(6);
+    document.getElementById("outQw").value = quaternion.w.toFixed(6);
 
-        document.getElementById("outQx").value = quaternion.x.toFixed(4);
-        document.getElementById("outQy").value = quaternion.y.toFixed(4);
-        document.getElementById("outQz").value = quaternion.z.toFixed(4);
-        document.getElementById("outQw").value = quaternion.w.toFixed(4);
-    }
+    // --- Euler (deg or rad based on toggle) ---
+    updateEulerOutput(euler);
 
-    else {
+    // --- Axis-Angle ---
+    updateAxisAngleOutput();
 
-        const unit =
-            document.querySelector(
-                'input[name="angleUnit"]:checked'
-            ).value;
-
-        const factor =
-            unit === "deg"
-                ? 180 / Math.PI
-                : 1;
-
-        document.getElementById("outEx").value =
-            (euler.x * factor).toFixed(2);
-
-        document.getElementById("outEy").value =
-            (euler.y * factor).toFixed(2);
-
-        document.getElementById("outEz").value =
-            (euler.z * factor).toFixed(2);
-    }
+    // --- Rotation matrix (from quaternion) ---
+    const m = new THREE.Matrix4().makeRotationFromQuaternion(quaternion);
+    const e = m.elements; // column-major in THREE.js
+    document.getElementById("m00").value = e[0].toFixed(4);
+    document.getElementById("m01").value = e[4].toFixed(4);
+    document.getElementById("m02").value = e[8].toFixed(4);
+    document.getElementById("m10").value = e[1].toFixed(4);
+    document.getElementById("m11").value = e[5].toFixed(4);
+    document.getElementById("m12").value = e[9].toFixed(4);
+    document.getElementById("m20").value = e[2].toFixed(4);
+    document.getElementById("m21").value = e[6].toFixed(4);
+    document.getElementById("m22").value = e[10].toFixed(4);
 }
 
 document
     .getElementById("convertBtn")
     .addEventListener("click", convert);
+
+document.querySelectorAll('input[name="outAngleUnit"]').forEach(r => {
+    r.addEventListener("change", () => updateEulerOutput(_lastEuler));
+});
+
+document.getElementById("outOrder").addEventListener("change", () => updateEulerOutput(_lastEuler));
+
+document.querySelectorAll('input[name="outAngleUnitAA"]').forEach(r => {
+    r.addEventListener("change", () => updateAxisAngleOutput());
+});
 
 document
     .getElementById("monForm")
@@ -853,13 +901,13 @@ document
 window.addEventListener("resize", () => {
 
     camera.aspect =
-        window.innerWidth / window.innerHeight;
+        viewer.clientWidth / viewer.clientHeight;
 
     camera.updateProjectionMatrix();
 
     renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
+        viewer.clientWidth,
+        viewer.clientHeight
     );
 });
 

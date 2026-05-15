@@ -1,123 +1,392 @@
+/* ================================
+   BASE
+   ================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   background: #111827;
   color: white;
   font-family: Arial, Helvetica, sans-serif;
 }
 
+form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================================
+   ROOT LAYOUT
+   ================================ */
 .layout {
   display: flex;
-  width: 100vw;
-  height: 100vh;
+  flex-direction: row;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
+/* ================================
+   LEFT COLUMN
+   ================================ */
 .leftColumn {
-  width: 340px;
-  height: 100vh;
-}
-
-.panel {
-  width: 340px;
-  padding: 16px;
-  box-sizing: border-box;
-
+  width: 660px;
+  flex-shrink: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.card {
-  background: #1e293b;
-  border-radius: 12px;
-  padding: 18px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  background: #111827;
+  border-right: 1px solid #1e293b;
+  overflow: hidden;
 }
 
 h1 {
   margin: 0;
-  padding: 15px;
+  padding: 10px 20px;
   text-align: center;
   background: #1e293b;
+  flex-shrink: 0;
+  font-size: 20px;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #334155;
+  width: 100%;
+}
+
+/* ================================
+   PANEL (scrollable)
+   ================================ */
+.panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+/* ================================
+   TOP ROW : Input | Output
+   ================================ */
+.top-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.card-half {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ================================
+   CARDS
+   ================================ */
+.card {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 .card h2 {
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
+  font-size: 14px;
 }
 
+/* ================================
+   FORM ELEMENTS
+   ================================ */
 label {
-  font-size: 13px;
+  font-size: 12px;
   color: #cbd5e1;
-}
-
-input,
-select,
-button {
-  border: none;
-  border-radius: 3px;
-}
-
-input {
-  position: relative;
-}
-
-input:focus {
-  z-index: 10;
 }
 
 input,
 select {
   background: #0f172a;
   color: white;
-  padding: 10px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 12px;
+}
+
+input:focus,
+select:focus {
+  outline: 1px solid #2563eb;
+  z-index: 10;
+  position: relative;
 }
 
 input[readonly] {
   opacity: 0.85;
+  cursor: default;
 }
 
 .orderHint {
-  font-size: 12px;
+  font-size: 11px;
   color: #94a3b8;
-  margin-bottom: 8px;
 }
 
 .unit-selector {
   display: flex;
   align-items: center;
-  gap: 18px;
-  margin-top: 10px;
+  gap: 14px;
+  margin-top: 4px;
 }
 
 .radio-option {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
-.radio-option input {
-  margin: 0;
+.radio-option input[type="radio"] {
+  width: auto;
+  padding: 0;
 }
 
+/* ================================
+   CONVERT BUTTON
+   ================================ */
 #convertBtn {
   background: #2563eb;
   color: white;
-
-  padding: 12px;
-
-  font-size: 15px;
+  padding: 11px;
+  width: 100%;
+  font-size: 14px;
   font-weight: bold;
-
   cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 #convertBtn:hover {
   background: #1d4ed8;
 }
 
+/* ================================
+   3D VIEWER
+   ================================ */
 #viewer {
   flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+/* ================================
+   OUTPUT DASHBOARD
+   ================================ */
+.output-card {
+  gap: 0;
+  padding: 12px 14px;
+}
+
+.output-card h2 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.output-block {
+  padding: 8px 0;
+}
+
+.output-block-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  row-gap: 4px;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.output-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.badge-quat {
+  background: #2563eb22;
+  color: #60a5fa;
+  border: 1px solid #2563eb55;
+}
+
+.badge-euler {
+  background: #16a34a22;
+  color: #4ade80;
+  border: 1px solid #16a34a55;
+}
+
+.badge-mat {
+  background: #9333ea22;
+  color: #c084fc;
+  border: 1px solid #9333ea55;
+}
+
+.badge-aa {
+  background: #ea580c22;
+  color: #fb923c;
+  border: 1px solid #ea580c55;
+}
+
+.output-sub {
+  color: #475569;
+  font-weight: 400;
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.output-divider {
+  height: 1px;
+  background: #334155;
+}
+
+.output-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.output-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.out-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.out-field label {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #64748b;
+  text-align: center;
+  width: auto;
+  padding: 0;
+  background: none;
+}
+
+.out-field input,
+.output-matrix input {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #1e3a5f;
+  border-radius: 4px;
+  padding: 6px 2px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  width: 100%;
+}
+
+.output-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrix-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.out-unit-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.out-radio {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.out-radio input[type="radio"] {
+  accent-color: #4ade80;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.out-radio span {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.out-order-select {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  width: auto;
+}
+
+.out-order-select:focus {
+  outline: none;
+  border-color: #4ade80;
 }

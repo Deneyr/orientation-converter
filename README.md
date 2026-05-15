@@ -2,7 +2,7 @@
 
 /!\ MADE WITH AI (ChatGPT - Claude) /!\
 
-Allow to convert an orientation from euler/Quaternion to euler/Quaternion
+Allow to convert an orientation from euler/Quaternion to euler/Quaternion/matrix/axis-angle
 3D visualization with axis order
 
 Inspired by the great converter :
