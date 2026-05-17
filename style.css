@@ -53,14 +53,27 @@ form {
 
 h1 {
   margin: 0;
-  padding: 10px 20px;
+  padding: 11px 20px;
   text-align: center;
   background: #1e293b;
   flex-shrink: 0;
-  font-size: 20px;
-  letter-spacing: 0.03em;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   border-bottom: 1px solid #334155;
   width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+}
+
+.h1-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #475569;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 /* ================================
@@ -389,4 +402,172 @@ input[readonly] {
 .out-order-select:focus {
   outline: none;
   border-color: #4ade80;
+}
+
+/* ================================
+   INPUT CARD (matches output style)
+   ================================ */
+.input-card {
+  gap: 0;
+  padding: 12px 14px;
+}
+
+.input-card h2 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.input-block-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  row-gap: 4px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.badge-type {
+  background: #0891b222;
+  color: #38bdf8;
+  border: 1px solid #0891b255;
+}
+
+/* Override out-field inputs in input card to be editable-looking */
+.input-card .out-field input {
+  border-color: #334155;
+  opacity: 1;
+  cursor: text;
+}
+
+.input-card .out-field input:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+.input-card select {
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.input-card .output-matrix input {
+  border-color: #334155;
+  font-size: 11px;
+  padding: 5px 2px;
+  cursor: text;
+  opacity: 1;
+}
+
+.input-card .output-matrix input:focus {
+  border-color: #2563eb;
+  outline: none;
+}
+
+/* ================================
+   INPUT CARD RESTYLED
+   ================================ */
+.input-card {
+  gap: 0;
+  padding: 12px 14px;
+}
+
+.input-card h2 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.input-block {
+  padding: 8px 0;
+}
+
+.input-block-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  row-gap: 4px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.input-divider {
+  height: 1px;
+  background: #334155;
+}
+
+.badge-type {
+  background: #0891b222;
+  color: #38bdf8;
+  border: 1px solid #0891b255;
+}
+
+/* Editable input fields inside input card — same look as output but interactive */
+.in-val {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 6px 2px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  width: 100%;
+}
+
+.in-val:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* Type select inside input block */
+.input-block select {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+/* Override global label inside input blocks */
+.input-block .out-field label {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #64748b;
+  text-align: center;
+  width: auto;
+  padding: 0;
+  background: none;
+}
+
+/* Matrix input rows same as output */
+.input-card .output-matrix input {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  padding: 6px 2px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  width: 100%;
+}
+
+.input-card .output-matrix input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.orderHint {
+  font-size: 11px;
+  color: #64748b;
+  font-family: 'Courier New', monospace;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-transform: none;
 }

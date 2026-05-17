@@ -4,15 +4,15 @@ import * as THREE
 import { OrbitControls }
     from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls';
 
-// =========================
-// SCENE
-// =========================
+// ─────────────────────────────────────────
+// SCENE SETUP
+// ─────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x111827);
 
-// =========================
-// CAMERA (Z-UP)
-// =========================
+// ─────────────────────────────────────────
+// CAMERA  —  Z-up convention (aerospace frame)
+// ─────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(
     45,
     viewer.clientWidth / viewer.clientHeight,
@@ -23,24 +23,24 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(6, -6, 6);
 camera.up.set(0, 0, 1);
 
-// =========================
+// ─────────────────────────────────────────
 // RENDERER
-// =========================
+// ─────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(viewer.clientWidth, viewer.clientHeight);
 viewer.appendChild(renderer.domElement);
 
-// =========================
-// CONTROLS
-// =========================
+// ─────────────────────────────────────────
+// ORBIT CONTROLS  —  damped mouse interaction
+// ─────────────────────────────────────────
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.target.set(0, 0, 0);
 controls.update();
 
-// =========================
-// AXES (FLÈCHES + LABELS)
-// =========================
+// ─────────────────────────────────────────
+// WORLD AXES  —  arrows + sprite labels (X/Y/Z)
+// ─────────────────────────────────────────
 function createAxisArrow(dir, color, label) {
 
     const arrow = new THREE.ArrowHelper(
@@ -82,9 +82,9 @@ function createAxisArrow(dir, color, label) {
 scene.add(createAxisArrow(new THREE.Vector3(1, 0, 0), 0xff0000, "X"));
 scene.add(createAxisArrow(new THREE.Vector3(0, 1, 0), 0x00ff00, "Y"));
 scene.add(createAxisArrow(new THREE.Vector3(0, 0, 1), 0x0000ff, "Z"));
-// =========================
-// UTILS
-// =========================
+// ─────────────────────────────────────────
+// HELPERS  —  shorthand DOM getters/setters
+// ─────────────────────────────────────────
 const get = id =>
     parseFloat(document.getElementById(id).value || 0);
 
@@ -102,67 +102,60 @@ function fromRad(v) {
     return angleMode === "deg" ? v * 180 / Math.PI : v;
 }
 
-// =========================
-// AIRCRAFT
-// =========================
+// ─────────────────────────────────────────
+// AIRCRAFT MESH
+// ─────────────────────────────────────────
 
 function createAircraftMesh() {
     const geometry = new THREE.BufferGeometry();
 
-    // =========================
-    // ✈️ AIRCRAFT MESH (AMÉLIORÉ)
-    // Repère :
-    // +X = forward
-    // +Y = droite
-    // +Z = haut
-    // =========================
+    // Body frame convention:
+    //   +X = forward (nose)
+    //   +Y = right wing
+    //   +Z = up
 
     const vertices = new Float32Array([
 
-        // =====================================================
-        // FUSELAGE
-        // =====================================================
+        // ── FUSELAGE ──────────────────────────────────────
 
-        // nez
+        // nose tip
         1.60, 0.00, 0.00,   // 0
 
-        // section avant arrondie
+        // rounded forward section
         1.35, 0.16, 0.00,   // 1
         1.35, 0.00, 0.16,   // 2
         1.35, -0.16, 0.00,   // 3
         1.35, 0.00, -0.12,   // 4
 
-        // cockpit / avant cabine
+        // cockpit / forward cabin
         0.90, 0.24, 0.00,   // 5
         0.90, 0.00, 0.24,   // 6
         0.90, -0.24, 0.00,   // 7
         0.90, 0.00, -0.18,   // 8
 
-        // centre fuselage (plus large)
+        // mid fuselage (widest section)
         0.10, 0.30, 0.00,   // 9
         0.10, 0.00, 0.30,   // 10
         0.10, -0.30, 0.00,   // 11
         0.10, 0.00, -0.22,   // 12
 
-        // arrière cabine
+        // aft cabin
         -0.70, 0.26, 0.00,   // 13
         -0.70, 0.00, 0.24,   // 14
         -0.70, -0.26, 0.00,   // 15
         -0.70, 0.00, -0.18,   // 16
 
-        // début queue
+        // tail taper start
         -1.25, 0.16, 0.00,   // 17
         -1.25, 0.00, 0.14,   // 18
         -1.25, -0.16, 0.00,   // 19
         -1.25, 0.00, -0.10,   // 20
 
-        // pointe queue
+        // tail tip
         -1.55, 0.00, 0.00,   // 21
 
 
-        // =====================================================
-        // AILE DROITE
-        // =====================================================
+        // ── RIGHT WING ────────────────────────────────────
 
         0.35, 0.24, -0.02,   // 22 root avant
         -0.40, 0.24, -0.02,   // 23 root arrière
@@ -173,9 +166,7 @@ function createAircraftMesh() {
         0.60, 0.24, -0.02,   // 26 raccord fuselage
 
 
-        // =====================================================
-        // AILE GAUCHE
-        // =====================================================
+        // ── LEFT WING ─────────────────────────────────────
 
         0.35, -0.24, -0.02,   // 27
         -0.40, -0.24, -0.02,   // 28
@@ -186,9 +177,7 @@ function createAircraftMesh() {
         0.60, -0.24, -0.02,   // 31
 
 
-        // =====================================================
-        // DÉRIVE VERTICALE
-        // =====================================================
+        // ── VERTICAL STABILIZER (fin) ─────────────────────
 
         -1.05, 0, 0.08,   // 36
         -1.35, 0, 0.08,   // 37
@@ -197,9 +186,7 @@ function createAircraftMesh() {
         -1.45, 0, 0.32,   // 39
 
 
-        // =====================================================
-        // STABILISATEUR DROIT
-        // =====================================================
+        // ── RIGHT HORIZONTAL STABILIZER ───────────────────
 
         -1.05, 0.08, 0.03,   // 36
         -1.35, 0.08, 0.03,   // 37
@@ -208,9 +195,7 @@ function createAircraftMesh() {
         -1.45, 0.52, 0.03,   // 39
 
 
-        // =====================================================
-        // STABILISATEUR GAUCHE
-        // =====================================================
+        // ── LEFT HORIZONTAL STABILIZER ────────────────────
 
         -1.05, -0.08, 0.03,   // 40
         -1.35, -0.08, 0.03,   // 41
@@ -219,9 +204,7 @@ function createAircraftMesh() {
         -1.45, -0.52, 0.03,   // 43
 
 
-        // =====================================================
-        // WINGLETS DROIT
-        // =====================================================
+        // ── RIGHT WINGLET ──────────────────────────────────
 
         -0.10, 1.55, -0.04,   // 44
         -0.65, 1.45, -0.04,   // 45
@@ -230,9 +213,7 @@ function createAircraftMesh() {
         -0.60, 1.52, 0.06,   // 47
 
 
-        // =====================================================
-        // WINGLETS GAUCHE
-        // =====================================================
+        // ── LEFT WINGLET ───────────────────────────────────
 
         -0.10, -1.55, -0.04,   // 48
         -0.65, -1.45, -0.04,   // 49
@@ -243,13 +224,11 @@ function createAircraftMesh() {
     ]);
 
 
-    // =========================
-    // TRIANGLES
-    // =========================
+    // ── FACE INDICES (triangles) ──────────────────────
 
     const indices = [
 
-        // FUSELAGE DESSUS
+        // fuselage — top surface
         0, 2, 1, 0, 3, 2,
 
         1, 2, 6, 1, 6, 5,
@@ -267,7 +246,7 @@ function createAircraftMesh() {
         17, 18, 21,
         18, 19, 21,
 
-        // FUSELAGE DESSOUS
+        // fuselage — bottom surface
         0, 1, 4,
         0, 4, 3,
 
@@ -298,33 +277,33 @@ function createAircraftMesh() {
         17, 21, 20,
         19, 20, 21,
 
-        // AILE DROITE
+        // right wing
         26, 22, 24,
         22, 23, 24,
         23, 25, 24,
 
-        // AILE GAUCHE
+        // left wing
         27, 31, 29,
         28, 27, 29,
         28, 29, 30,
 
-        // DÉRIVE
+        // vertical stabilizer (fin)
         33, 35, 34,
         32, 34, 33,
 
-        // STAB DROIT
+        // right horizontal stabilizer
         36, 37, 38,
         37, 39, 38,
 
-        // STAB GAUCHE
+        // left horizontal stabilizer
         40, 42, 41,
         41, 42, 43,
 
-        // WINGLETS DROIT
+        // right winglet
         44, 46, 45,
         45, 46, 47,
 
-        // WINGLETS GAUCHE
+        // left winglet
         48, 49, 50,
         49, 51, 50,
     ];
@@ -344,9 +323,11 @@ function createAircraftMesh() {
 const plane = createAircraftMesh();
 scene.add(plane);
 
-// =========================
-// ROTATION VIZ
-// =========================
+// ─────────────────────────────────────────
+// ROTATION VISUALIZATION
+// Euler arcs drawn in the intrinsic (body) frame,
+// one colored arc per rotation axis in application order.
+// ─────────────────────────────────────────
 
 const rotationVizGroup = new THREE.Group();
 scene.add(rotationVizGroup);
@@ -362,7 +343,7 @@ function createRotationArc(axis, angle, radius, color) {
 
         let p;
 
-        // arc dans XY
+        // Arc built in the XY plane, then rotated to face the correct axis
         p = new THREE.Vector3(
             radius * Math.cos(t),
             radius * Math.sin(t),
@@ -381,7 +362,7 @@ function createRotationArc(axis, angle, radius, color) {
 
     const line = new THREE.Line(geometry, material);
 
-    // orientation selon axe
+    // Rotate the arc plane to align with the rotation axis
     if (axis === 'X') {
         line.rotation.y = Math.PI / 2;
     }
@@ -436,15 +417,13 @@ function updateRotationVisualization(euler) {
         Z: 0x4488ff
     };
 
-    // =========================
-    // ORIENTATION CUMULÉE
-    // =========================
+    // Tracks the cumulative rotation applied so far,
+    // so each subsequent arc is drawn in the correct rotated frame.
 
     let cumulativeQuat = new THREE.Quaternion();
 
-    // =========================
-    // DIRECTION INITIALE
-    // =========================
+    // Initial reference direction for the first arc,
+    // chosen as the last axis in the order (outermost rotation).
 
     let currentDirection =
         axisVectors[order[2]]
@@ -458,9 +437,8 @@ function updateRotationVisualization(euler) {
         const axisName = order[i];
         const angle = angles[axisName];
 
-        // =========================
-        // AXE INTRINSÈQUE COURANT
-        // =========================
+        // Intrinsic axis: rotate the world axis by the cumulative quaternion
+        // so each arc follows the body frame, not the world frame.
 
         const axis =
             axisVectors[axisName]
@@ -468,13 +446,13 @@ function updateRotationVisualization(euler) {
                 .applyQuaternion(cumulativeQuat)
                 .normalize();
 
-        // =========================
-        // BASE DU PLAN
-        // =========================
+        // Compute an in-plane reference vector perpendicular to the rotation axis,
+        // used as the starting direction for arc sampling.
 
         let u = currentDirection.clone();
 
-        // correction dernier arc
+        // For the last arc, use the direction from the previous rotation step
+        // to keep the arc visually connected.
         if (i === order.length - 1) {
 
             u =
@@ -490,9 +468,8 @@ function updateRotationVisualization(euler) {
                 .crossVectors(axis, u)
                 .normalize();
 
-        // =========================
-        // PARAMÈTRES ARC
-        // =========================
+        // Arc parameters: last arc is inset and offset along the reference direction
+        // to visually separate it from the second arc.
 
         let offset = new THREE.Vector3();
         let realRadius = radius;
@@ -507,9 +484,8 @@ function updateRotationVisualization(euler) {
             realRadius = radius * 0.75;
         }
 
-        // =========================
-        // POINTS ARC
-        // =========================
+        // Sample arc points in the plane spanned by (u, v),
+        // centered at offset from the world origin.
 
         const points = [];
 
@@ -531,9 +507,7 @@ function updateRotationVisualization(euler) {
             points.push(p);
         }
 
-        // =========================
-        // ARC PRINCIPAL
-        // =========================
+        // Build and add the arc line to the scene.
 
         const geometry =
             new THREE.BufferGeometry()
@@ -549,9 +523,7 @@ function updateRotationVisualization(euler) {
 
         rotationVizGroup.add(arc);
 
-        // =====================================================
-        // TRAIT DE DÉBUT
-        // =====================================================
+        // Start tick — small cross mark at the arc origin
 
         const startPoint = points[0];
 
@@ -560,10 +532,8 @@ function updateRotationVisualization(euler) {
                 .sub(offset)
                 .normalize();
 
-        // =====================================================
-        // PETIT DÉCALAGE POUR ÉVITER LE Z-FIGHTING
-        // AVEC LE 3ᵉ AXE
-        // =====================================================
+        // Slight offset along the axis to avoid z-fighting
+        // when the first arc overlaps with the world axis line.
 
         let tickOffset = new THREE.Vector3();
 
@@ -605,9 +575,7 @@ function updateRotationVisualization(euler) {
 
         rotationVizGroup.add(startTick);
 
-        // =====================================================
-        // FLÈCHE DE FIN
-        // =====================================================
+        // End arrow — tangent direction at the tip of the arc
 
         const endPoint = points[points.length - 1];
 
@@ -621,13 +589,11 @@ function updateRotationVisualization(euler) {
                 )
                 .normalize();
 
-        // =====================================================
-        // ORIENTATION DES FLÈCHES
-        // =====================================================
+        // Arrow head size is signed so the chevron points
+        // in the correct direction for both positive and negative angles.
 
-        // pour les 2 premiers arcs
-        let arrowLength = 0.16;
-        let arrowWidth = 0.05;
+        let arrowLength = 0.16 * Math.sign(angle);
+        let arrowWidth = 0.05 * Math.sign(angle);
 
         const arrowHead1 =
             endPoint.clone()
@@ -684,17 +650,14 @@ function updateRotationVisualization(euler) {
         rotationVizGroup.add(arrow1);
         rotationVizGroup.add(arrow2);
 
-        // =========================
-        // NOUVELLE DIRECTION
-        // =========================
+        // Rotate the reference direction by this step's angle,
+        // ready for the next arc in the sequence.
 
         currentDirection =
             u.clone()
                 .applyAxisAngle(axis, angle);
 
-        // =========================
-        // MAJ QUATERNION
-        // =========================
+        // Accumulate the rotation quaternion (pre-multiply = intrinsic order).
 
         const q = new THREE.Quaternion();
 
@@ -704,9 +667,9 @@ function updateRotationVisualization(euler) {
     }
 }
 
-// =========================
-// UI
-// =========================
+// ─────────────────────────────────────────
+// UI — input type switching & order hint
+// ─────────────────────────────────────────
 
 const inputType = document.getElementById("inputType");
 const orderSelect = document.getElementById("order");
@@ -717,23 +680,18 @@ function updateOrderHint() {
     const order = orderSelect.value;
 
     orderHint.textContent =
-        `${order} (${order[0].toLowerCase()} ${order[1].toLowerCase()}' ${order[2].toLowerCase()}'' )`;
+        `Intrinsic order (${order[0].toLowerCase()} ${order[1].toLowerCase()}' ${order[2].toLowerCase()}'')`;
 
     // sync order tags displayed in output panel
 
 }
 
 function refreshUI() {
-
-    document.getElementById("eulerInputFields").style.display =
-        inputType.value === "euler"
-            ? "block"
-            : "none";
-
-    document.getElementById("quatInputFields").style.display =
-        inputType.value === "quaternion"
-            ? "block"
-            : "none";
+    const v = inputType.value;
+    document.getElementById("eulerInputFields").style.display = v === "euler" ? "block" : "none";
+    document.getElementById("quatInputFields").style.display = v === "quaternion" ? "block" : "none";
+    document.getElementById("aaInputFields").style.display = v === "axisangle" ? "block" : "none";
+    document.getElementById("matInputFields").style.display = v === "matrix" ? "block" : "none";
 }
 
 inputType.addEventListener("change", refreshUI);
@@ -742,9 +700,11 @@ orderSelect.addEventListener("change", () => { updateOrderHint(); convert(); });
 refreshUI();
 updateOrderHint();
 
-// =========================
-// EULER OUTPUT TOGGLE
-// =========================
+// ─────────────────────────────────────────
+// OUTPUT — Euler display (recomputed from cached quaternion)
+// Recalculates Euler angles in the selected output order
+// without re-running the full conversion pipeline.
+// ─────────────────────────────────────────
 
 function updateEulerOutput(euler) {
     if (!euler) return;
@@ -792,9 +752,11 @@ function updateAxisAngleOutput() {
     document.getElementById("outAngle").value = theta.toFixed(dec);
 }
 
-// =========================
-// CONVERT
-// =========================
+// ─────────────────────────────────────────
+// CONVERT — main entry point
+// Reads the active input type, builds a quaternion,
+// then populates all output representations.
+// ─────────────────────────────────────────
 
 function convert() {
 
@@ -806,29 +768,15 @@ function convert() {
         const ex = parseFloat(document.getElementById("ex").value);
         const ey = parseFloat(document.getElementById("ey").value);
         const ez = parseFloat(document.getElementById("ez").value);
+        const unit = document.querySelector('input[name="angleUnit"]:checked').value;
+        const factor = unit === "deg" ? Math.PI / 180 : 1;
 
-        const unit =
-            document.querySelector(
-                'input[name="angleUnit"]:checked'
-            ).value;
-
-        const factor =
-            unit === "deg"
-                ? Math.PI / 180
-                : 1;
-
-        euler = new THREE.Euler(
-            ex * factor,
-            ey * factor,
-            ez * factor,
-            orderSelect.value
-        );
-
+        euler = new THREE.Euler(ex * factor, ey * factor, ez * factor, orderSelect.value);
         quaternion = new THREE.Quaternion();
         quaternion.setFromEuler(euler);
     }
 
-    else {
+    else if (inputType.value === "quaternion") {
 
         quaternion = new THREE.Quaternion(
             parseFloat(document.getElementById("qx").value),
@@ -836,7 +784,46 @@ function convert() {
             parseFloat(document.getElementById("qz").value),
             parseFloat(document.getElementById("qw").value)
         ).normalize();
+        euler = new THREE.Euler();
+        euler.setFromQuaternion(quaternion, orderSelect.value);
+    }
 
+    else if (inputType.value === "axisangle") {
+
+        let ax = parseFloat(document.getElementById("inAx").value) || 0;
+        let ay = parseFloat(document.getElementById("inAy").value) || 0;
+        let az = parseFloat(document.getElementById("inAz").value) || 0;
+        let theta = parseFloat(document.getElementById("inAngle").value) || 0;
+        const unitAA = document.querySelector('input[name="inAngleUnitAA"]:checked').value;
+        if (unitAA === "deg") theta = theta * Math.PI / 180;
+
+        // normalize axis
+        const len = Math.sqrt(ax * ax + ay * ay + az * az);
+        if (len > 0.0001) { ax /= len; ay /= len; az /= len; }
+        else { ax = 1; ay = 0; az = 0; }
+
+        const axis = new THREE.Vector3(ax, ay, az);
+        quaternion = new THREE.Quaternion();
+        quaternion.setFromAxisAngle(axis, theta);
+        euler = new THREE.Euler();
+        euler.setFromQuaternion(quaternion, orderSelect.value);
+    }
+
+    else { // matrix
+
+        const m4 = new THREE.Matrix4();
+        // setFromMatrix expects column-major flat array (THREE.js convention)
+        // user inputs row-major visually → [m00,m01,m02, m10,m11,m12, m20,m21,m22]
+        const r = (id) => parseFloat(document.getElementById(id).value) || 0;
+        m4.set(
+            r("im00"), r("im01"), r("im02"), 0,
+            r("im10"), r("im11"), r("im12"), 0,
+            r("im20"), r("im21"), r("im22"), 0,
+            0, 0, 0, 1
+        );
+        quaternion = new THREE.Quaternion();
+        quaternion.setFromRotationMatrix(m4);
+        quaternion.normalize();
         euler = new THREE.Euler();
         euler.setFromQuaternion(quaternion, orderSelect.value);
     }
@@ -845,21 +832,25 @@ function convert() {
 
     _lastEuler = euler;
     _lastQuat = quaternion.clone();
-    updateRotationVisualization(euler);
 
-    // --- Quaternion ---
+    // Visualize using the OUTPUT euler order so arcs match what's displayed
+    const outOrder = document.getElementById("outOrder").value;
+    const eulerForViz = new THREE.Euler().setFromQuaternion(quaternion, outOrder);
+    updateRotationVisualization(eulerForViz);
+
+    // ── Quaternion output ─────────────────────────────
     document.getElementById("outQx").value = quaternion.x.toFixed(6);
     document.getElementById("outQy").value = quaternion.y.toFixed(6);
     document.getElementById("outQz").value = quaternion.z.toFixed(6);
     document.getElementById("outQw").value = quaternion.w.toFixed(6);
 
-    // --- Euler (deg or rad based on toggle) ---
+    // ── Euler output (order + unit driven by output panel) ─
     updateEulerOutput(euler);
 
-    // --- Axis-Angle ---
+    // ── Axis-Angle output ─────────────────────────────
     updateAxisAngleOutput();
 
-    // --- Rotation matrix (from quaternion) ---
+    // ── Rotation matrix  (column-major → row-major display) ─
     const m = new THREE.Matrix4().makeRotationFromQuaternion(quaternion);
     const e = m.elements; // column-major in THREE.js
     document.getElementById("m00").value = e[0].toFixed(4);
@@ -881,7 +872,14 @@ document.querySelectorAll('input[name="outAngleUnit"]').forEach(r => {
     r.addEventListener("change", () => updateEulerOutput(_lastEuler));
 });
 
-document.getElementById("outOrder").addEventListener("change", () => updateEulerOutput(_lastEuler));
+document.getElementById("outOrder").addEventListener("change", () => {
+    updateEulerOutput(_lastEuler);
+    if (_lastQuat) {
+        const outOrder = document.getElementById("outOrder").value;
+        const eulerForViz = new THREE.Euler().setFromQuaternion(_lastQuat, outOrder);
+        updateRotationVisualization(eulerForViz);
+    }
+});
 
 document.querySelectorAll('input[name="outAngleUnitAA"]').forEach(r => {
     r.addEventListener("change", () => updateAxisAngleOutput());
@@ -894,9 +892,9 @@ document
         convert();
     });
 
-// =========================
-// RESIZE
-// =========================
+// ─────────────────────────────────────────
+// RESPONSIVE RESIZE  —  keep viewer filling its container
+// ─────────────────────────────────────────
 
 window.addEventListener("resize", () => {
 
@@ -911,13 +909,9 @@ window.addEventListener("resize", () => {
     );
 });
 
-// =========================
-// ANIMATION
-// =========================
-
-// =========================
-// LOOP
-// =========================
+// ─────────────────────────────────────────
+// RENDER LOOP
+// ─────────────────────────────────────────
 function animate() {
 
     requestAnimationFrame(animate);

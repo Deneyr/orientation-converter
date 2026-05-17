@@ -1,76 +1,132 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orientation Converter</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <form id="monForm">
+  <form id="monForm" novalidate>
 
-    <!-- =============================================
-         ROOT LAYOUT : leftColumn | viewer
-         ============================================= -->
-    <h1>Orientation Converter</h1>
+    <h1>Orientation Converter <span class="h1-sub">Euler · Quaternion · Axis-Angle · Matrix</span></h1>
+
     <div class="layout">
 
       <!-- =================== LEFT COLUMN =================== -->
       <div class="leftColumn">
-
         <div class="panel">
 
-          <!-- TOP ROW : Input card | Output card -->
+          <!-- TOP ROW : Input | Output -->
           <div class="top-row">
 
-            <!-- INPUT CARD -->
-            <div class="card card-half">
+            <!-- ===== INPUT CARD ===== -->
+            <div class="card card-half input-card">
               <h2>Input</h2>
 
-              <label>Type</label>
-              <select id="inputType">
-                <option value="euler">Euler</option>
-                <option value="quaternion">Quaternion</option>
-              </select>
+              <!-- Type selector -->
+              <div class="input-block">
+                <div class="input-block-title">
+                  <span class="output-badge badge-type">T</span>
+                  Type
+                </div>
+                <select id="inputType">
+                  <option value="euler">Euler</option>
+                  <option value="quaternion">Quaternion</option>
+                  <option value="axisangle">Axis-Angle</option>
+                  <option value="matrix">Rotation Matrix</option>
+                </select>
+              </div>
+
+              <div class="input-divider"></div>
 
               <!-- EULER INPUT -->
-              <div id="eulerInputFields">
-                <label>Intrinsic order</label>
-                <select id="order">
-                  <option selected>ZYX</option>
-                  <option>ZXY</option>
-                  <option>YZX</option>
-                  <option>YXZ</option>
-                  <option>XZY</option>
-                  <option>XYZ</option>
-                </select>
-                <div class="orderHint" id="orderHint">ZYX (z y' x'')</div>
-                <div><label>X</label><input class="only-number" id="ex" type="number" value="0" step="0.1" /></div>
-                <div><label>Y</label><input class="only-number" id="ey" type="number" value="0" step="0.1" /></div>
-                <div><label>Z</label><input class="only-number" id="ez" type="number" value="0" step="0.1" /></div>
-                <div class="unit-selector">
-                  <label class="radio-option">
-                    <input type="radio" name="angleUnit" value="deg" checked /><span>Degrees</span>
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="angleUnit" value="rad" /><span>Radians</span>
-                  </label>
+              <div id="eulerInputFields" class="input-block">
+                <div class="input-block-title">
+                  <span class="output-badge badge-euler">E</span>
+                  Euler
+                  <select id="order" class="out-order-select">
+                    <option selected>ZYX</option>
+                    <option>ZXY</option>
+                    <option>YZX</option>
+                    <option>YXZ</option>
+                    <option>XZY</option>
+                    <option>XYZ</option>
+                  </select>
+                  <span class="orderHint" id="orderHint">Intrinsic order (z y' x'')</span>
+                  <div class="out-unit-toggle">
+                    <label class="out-radio"><input type="radio" name="angleUnit" value="deg" checked /><span>deg</span></label>
+                    <label class="out-radio"><input type="radio" name="angleUnit" value="rad" /><span>rad</span></label>
+                  </div>
+                </div>
+                <div class="output-grid-3">
+                  <div class="out-field"><label>X</label><input class="in-val" id="ex" type="number" value="0" step="0.1" /></div>
+                  <div class="out-field"><label>Y</label><input class="in-val" id="ey" type="number" value="0" step="0.1" /></div>
+                  <div class="out-field"><label>Z</label><input class="in-val" id="ez" type="number" value="0" step="0.1" /></div>
                 </div>
               </div>
 
-              <!-- QUAT INPUT -->
-              <div id="quatInputFields" style="display:none">
-                <div><label>qx</label><input id="qx" type="number" value="0" step="0.001" /></div>
-                <div><label>qy</label><input id="qy" type="number" value="0" step="0.001" /></div>
-                <div><label>qz</label><input id="qz" type="number" value="0" step="0.001" /></div>
-                <div><label>qw</label><input id="qw" type="number" value="1" step="0.001" /></div>
+              <!-- QUATERNION INPUT -->
+              <div id="quatInputFields" class="input-block" style="display:none">
+                <div class="input-block-title">
+                  <span class="output-badge badge-quat">Q</span>
+                  Quaternion
+                </div>
+                <div class="output-grid-4">
+                  <div class="out-field"><label>qx</label><input class="in-val" id="qx" type="number" value="0" step="0.001" /></div>
+                  <div class="out-field"><label>qy</label><input class="in-val" id="qy" type="number" value="0" step="0.001" /></div>
+                  <div class="out-field"><label>qz</label><input class="in-val" id="qz" type="number" value="0" step="0.001" /></div>
+                  <div class="out-field"><label>qw</label><input class="in-val" id="qw" type="number" value="1" step="0.001" /></div>
+                </div>
               </div>
+
+              <!-- AXIS-ANGLE INPUT -->
+              <div id="aaInputFields" class="input-block" style="display:none">
+                <div class="input-block-title">
+                  <span class="output-badge badge-aa">A</span>
+                  Axis-Angle
+                  <div class="out-unit-toggle">
+                    <label class="out-radio"><input type="radio" name="inAngleUnitAA" value="deg" checked /><span>deg</span></label>
+                    <label class="out-radio"><input type="radio" name="inAngleUnitAA" value="rad" /><span>rad</span></label>
+                  </div>
+                </div>
+                <div class="output-grid-4">
+                  <div class="out-field"><label>ax</label><input class="in-val" id="inAx" type="number" value="0" step="0.01" /></div>
+                  <div class="out-field"><label>ay</label><input class="in-val" id="inAy" type="number" value="0" step="0.01" /></div>
+                  <div class="out-field"><label>az</label><input class="in-val" id="inAz" type="number" value="1" step="0.01" /></div>
+                  <div class="out-field"><label>θ</label><input class="in-val" id="inAngle" type="number" value="0" step="1" /></div>
+                </div>
+              </div>
+
+              <!-- MATRIX INPUT -->
+              <div id="matInputFields" class="input-block" style="display:none">
+                <div class="input-block-title">
+                  <span class="output-badge badge-mat">M</span>
+                  Rotation Matrix <span class="output-sub">3×3</span>
+                </div>
+                <div class="output-matrix">
+                  <div class="matrix-row">
+                    <input class="in-val" id="im00" type="number" value="1" step="0.001" />
+                    <input class="in-val" id="im01" type="number" value="0" step="0.001" />
+                    <input class="in-val" id="im02" type="number" value="0" step="0.001" />
+                  </div>
+                  <div class="matrix-row">
+                    <input class="in-val" id="im10" type="number" value="0" step="0.001" />
+                    <input class="in-val" id="im11" type="number" value="1" step="0.001" />
+                    <input class="in-val" id="im12" type="number" value="0" step="0.001" />
+                  </div>
+                  <div class="matrix-row">
+                    <input class="in-val" id="im20" type="number" value="0" step="0.001" />
+                    <input class="in-val" id="im21" type="number" value="0" step="0.001" />
+                    <input class="in-val" id="im22" type="number" value="1" step="0.001" />
+                  </div>
+                </div>
+              </div>
+
             </div>
             <!-- END INPUT CARD -->
 
-            <!-- OUTPUT CARD -->
+            <!-- ===== OUTPUT CARD ===== -->
             <div class="card card-half output-card">
               <h2>Output</h2>
 
@@ -96,18 +152,12 @@
                   <span class="output-badge badge-euler">E</span>
                   Euler
                   <select id="outOrder" class="out-order-select">
-                    <option>ZYX</option>
-                    <option>ZXY</option>
-                    <option>YZX</option>
-                    <option>YXZ</option>
-                    <option>XZY</option>
-                    <option>XYZ</option>
+                    <option>ZYX</option><option>ZXY</option><option>YZX</option>
+                    <option>YXZ</option><option>XZY</option><option>XYZ</option>
                   </select>
                   <div class="out-unit-toggle">
-                    <label class="out-radio"><input type="radio" name="outAngleUnit" value="deg"
-                        checked /><span>deg</span></label>
-                    <label class="out-radio"><input type="radio" name="outAngleUnit"
-                        value="rad" /><span>rad</span></label>
+                    <label class="out-radio"><input type="radio" name="outAngleUnit" value="deg" checked /><span>deg</span></label>
+                    <label class="out-radio"><input type="radio" name="outAngleUnit" value="rad" /><span>rad</span></label>
                   </div>
                 </div>
                 <div class="output-grid-3">
@@ -125,10 +175,8 @@
                   <span class="output-badge badge-aa">A</span>
                   Axis-Angle
                   <div class="out-unit-toggle">
-                    <label class="out-radio"><input type="radio" name="outAngleUnitAA" value="deg"
-                        checked /><span>deg</span></label>
-                    <label class="out-radio"><input type="radio" name="outAngleUnitAA"
-                        value="rad" /><span>rad</span></label>
+                    <label class="out-radio"><input type="radio" name="outAngleUnitAA" value="deg" checked /><span>deg</span></label>
+                    <label class="out-radio"><input type="radio" name="outAngleUnitAA" value="rad" /><span>rad</span></label>
                   </div>
                 </div>
                 <div class="output-grid-4">
@@ -166,23 +214,17 @@
           </div>
           <!-- END TOP ROW -->
 
-          <!-- CONVERT BUTTON -->
           <button id="convertBtn">Convert</button>
 
         </div>
-        <!-- END PANEL -->
-
       </div>
       <!-- END LEFT COLUMN -->
 
-      <!-- 3D VIEWER -->
       <div id="viewer"></div>
 
     </div>
-    <!-- END LAYOUT -->
 
     <script type="module" src="script.js"></script>
   </form>
 </body>
-
 </html>
